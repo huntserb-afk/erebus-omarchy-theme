@@ -1,0 +1,12 @@
+# Local/editor files
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Backup files
+*.backup
+
+# Local Git metadata
+.idea/
+.vscode/
