@@ -1,62 +1,154 @@
 #!/usr/bin/env bash
-set -e
+set -Eeuo pipefail
 
-REPO_URL="https://github.com/huntserb-afk/erebus-omarchy-theme.git"
+REPO="huntserb-afk/erebus-omarchy-theme"
+BRANCH="main"
+ARCHIVE_URL="https://codeload.github.com/${REPO}/tar.gz/refs/heads/${BRANCH}"
+
 TMP_DIR="$(mktemp -d)"
-
-cleanup() {
-    rm -rf "$TMP_DIR"
-}
-trap cleanup EXIT
+trap 'rm -rf "$TMP_DIR"' EXIT
 
 echo "╭─[ E R E B U S ]"
 echo "╰─[ ONE-COMMAND INSTALLER ]"
 echo
 
-echo "[1/6] Downloading Erebus..."
-git clone --depth 1 --branch main "$REPO_URL" "$TMP_DIR/repo"
+echo "[1/7] Checking requirements..."
 
-REPO_DIR="$TMP_DIR/repo"
+for cmd in bash curl tar omarchy systemctl; do
+    command -v "$cmd" >/dev/null 2>&1 || {
+        echo "ERROR: Required command not found: $cmd"
+        exit 1
+    }
+done
+
+[[ -d "$HOME/.config/omarchy" ]] || {
+    echo "ERROR: Omarchy configuration directory not found."
+    exit 1
+}
+
+echo "Requirements: OK"
+echo
+
+echo "[2/7] Downloading Erebus..."
+
+ARCHIVE="$TMP_DIR/erebus.tar.gz"
+
+curl -fL --retry 3 --connect-timeout 10 \
+    "$ARCHIVE_URL" -o "$ARCHIVE"
+
+echo "Download: OK"
+echo
+
+echo "[3/7] Extracting Erebus..."
+
+tar -xzf "$ARCHIVE" -C "$TMP_DIR"
+
+REPO_DIR="$TMP_DIR/erebus-omarchy-theme-$BRANCH"
+
+[[ -d "$REPO_DIR" ]] || {
+    echo "ERROR: Invalid Erebus archive."
+    exit 1
+}
+
+for state in dawn day dusk night abyss; do
+    [[ -d "$REPO_DIR/themes/erebus-$state" ]] || {
+        echo "ERROR: Missing theme: erebus-$state"
+        exit 1
+    }
+done
+
+for file in \
+    "$REPO_DIR/darkness/darkness.sh" \
+    "$REPO_DIR/darkness/erebus-darkness.service" \
+    "$REPO_DIR/darkness/erebus-darkness.timer"
+do
+    [[ -f "$file" ]] || {
+        echo "ERROR: Missing required file: $file"
+        exit 1
+    }
+done
+
+echo "Archive validation: OK"
+echo
+
+echo "[4/7] Preparing installation..."
+
 OMARCHY_THEMES="$HOME/.config/omarchy/themes"
 EREBUS_DIR="$HOME/.config/omarchy/erebus"
 SYSTEMD_DIR="$HOME/.config/systemd/user"
+STAGE="$TMP_DIR/stage"
 
-echo "[2/6] Creating directories..."
-mkdir -p "$OMARCHY_THEMES"
-mkdir -p "$EREBUS_DIR/wallpapers"
-mkdir -p "$SYSTEMD_DIR"
+mkdir -p "$STAGE/themes" "$STAGE/wallpapers" "$STAGE/systemd"
 
-echo "[3/6] Installing themes..."
-for theme in dawn day dusk night abyss; do
-    rm -rf "$OMARCHY_THEMES/erebus-$theme"
-    cp -a "$REPO_DIR/themes/erebus-$theme" "$OMARCHY_THEMES/"
+for state in dawn day dusk night abyss; do
+    cp -a "$REPO_DIR/themes/erebus-$state" "$STAGE/themes/"
 done
 
-echo "[4/6] Installing wallpapers..."
-cp -f "$REPO_DIR/wallpapers/"*.jpg "$EREBUS_DIR/wallpapers/"
+cp -f "$REPO_DIR/wallpapers/"*.jpg "$STAGE/wallpapers/"
+cp -f "$REPO_DIR/darkness/darkness.sh" "$STAGE/darkness.sh"
+cp -f "$REPO_DIR/darkness/erebus-darkness.service" "$STAGE/systemd/"
+cp -f "$REPO_DIR/darkness/erebus-darkness.timer" "$STAGE/systemd/"
 
-echo "[5/6] Installing darkness cycle..."
-cp -f "$REPO_DIR/darkness/darkness.sh" "$EREBUS_DIR/darkness.sh"
-chmod +x "$EREBUS_DIR/darkness.sh"
+chmod +x "$STAGE/darkness.sh"
+bash -n "$STAGE/darkness.sh"
 
-cp -f "$REPO_DIR/darkness/erebus-darkness.service" "$SYSTEMD_DIR/"
-cp -f "$REPO_DIR/darkness/erebus-darkness.timer" "$SYSTEMD_DIR/"
+echo "Installation files: OK"
+echo
 
-echo "[6/6] Enabling Erebus..."
+echo "[5/7] Installing themes and wallpapers..."
+
+mkdir -p "$OMARCHY_THEMES" "$EREBUS_DIR/wallpapers" "$SYSTEMD_DIR"
+
+for state in dawn day dusk night abyss; do
+    rm -rf "$OMARCHY_THEMES/erebus-$state"
+    cp -a "$STAGE/themes/erebus-$state" "$OMARCHY_THEMES/"
+done
+
+cp -f "$STAGE/wallpapers/"*.jpg "$EREBUS_DIR/wallpapers/"
+cp -f "$STAGE/darkness.sh" "$EREBUS_DIR/darkness.sh"
+cp -f "$STAGE/systemd/erebus-darkness.service" "$SYSTEMD_DIR/"
+cp -f "$STAGE/systemd/erebus-darkness.timer" "$SYSTEMD_DIR/"
+
+echo "Files installed: OK"
+echo
+
+echo "[6/7] Enabling darkness cycle..."
+
 systemctl --user daemon-reload
 systemctl --user enable --now erebus-darkness.timer
 
 rm -f "$EREBUS_DIR/current-state"
-
 systemctl --user start erebus-darkness.service
 
+systemctl --user is-active --quiet erebus-darkness.timer || {
+    echo "ERROR: Erebus timer failed to start."
+    exit 1
+}
+
+echo "Darkness cycle: ACTIVE"
 echo
+
+echo "[7/7] Verifying installation..."
+
+for state in dawn day dusk night abyss; do
+    test -f "$OMARCHY_THEMES/erebus-$state/colors.toml"
+    test -f "$OMARCHY_THEMES/erebus-$state/hyprland.conf"
+    test -f "$OMARCHY_THEMES/erebus-$state/alacritty.toml"
+    test -f "$OMARCHY_THEMES/erebus-$state/backgrounds/EREBUS.jpg"
+done
+
+test -x "$EREBUS_DIR/darkness.sh"
+test -f "$SYSTEMD_DIR/erebus-darkness.service"
+test -f "$SYSTEMD_DIR/erebus-darkness.timer"
+
+echo "Verification: PASSED"
+echo
+
 echo "╭─[ E R E B U S ]"
 echo "╰─[ INSTALLED ]"
 echo
 echo "Current theme:"
 omarchy theme current
-
 echo
 echo "Darkness cycle:"
 echo "  00:00 → Abyss"
