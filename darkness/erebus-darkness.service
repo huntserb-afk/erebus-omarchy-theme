@@ -1,0 +1,6 @@
+[Unit]
+Description=Erebus Darkness Cycle
+
+[Service]
+Type=oneshot
+ExecStart=%h/.config/omarchy/erebus/darkness.sh

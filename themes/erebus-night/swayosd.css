@@ -1,0 +1,34 @@
+/* EREBUS — Primordial Darkness */
+/* Omarchy SwayOSD */
+
+window {
+    background: #111315;
+    border: 2px solid #8B1E24;
+    border-radius: 4px;
+}
+
+#container {
+    background: transparent;
+    padding: 12px;
+}
+
+image {
+    color: #B52A32;
+}
+
+label {
+    color: #D6D3CE;
+    font-family: "JetBrains Mono";
+    font-size: 14px;
+}
+
+progressbar {
+    background: #181A1D;
+    border: 1px solid #292B2E;
+    border-radius: 2px;
+}
+
+progressbar progress {
+    background: #8B1E24;
+    border-radius: 2px;
+}
