@@ -2,11 +2,8 @@
 Description=Erebus Darkness Cycle
 
 [Timer]
-OnCalendar=*-*-* 00:00:00
-OnCalendar=*-*-* 06:00:00
-OnCalendar=*-*-* 09:00:00
-OnCalendar=*-*-* 17:00:00
-OnCalendar=*-*-* 21:00:00
+OnBootSec=30s
+OnUnitActiveSec=60s
 Persistent=true
 
 [Install]
