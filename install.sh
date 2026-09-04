@@ -1,37 +1,48 @@
 #!/usr/bin/env bash
 set -e
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_URL="https://github.com/huntserb-afk/erebus-omarchy-theme.git"
+TMP_DIR="$(mktemp -d)"
+
+cleanup() {
+    rm -rf "$TMP_DIR"
+}
+trap cleanup EXIT
+
+echo "╭─[ E R E B U S ]"
+echo "╰─[ ONE-COMMAND INSTALLER ]"
+echo
+
+echo "[1/6] Downloading Erebus..."
+git clone --depth 1 --branch main "$REPO_URL" "$TMP_DIR/repo"
+
+REPO_DIR="$TMP_DIR/repo"
 OMARCHY_THEMES="$HOME/.config/omarchy/themes"
 EREBUS_DIR="$HOME/.config/omarchy/erebus"
 SYSTEMD_DIR="$HOME/.config/systemd/user"
 
-echo "╭─[ E R E B U S ]"
-echo "╰─[ INSTALLER ]"
-echo
-
-echo "[1/5] Creating directories..."
+echo "[2/6] Creating directories..."
 mkdir -p "$OMARCHY_THEMES"
 mkdir -p "$EREBUS_DIR/wallpapers"
 mkdir -p "$SYSTEMD_DIR"
 
-echo "[2/5] Installing themes..."
+echo "[3/6] Installing themes..."
 for theme in dawn day dusk night abyss; do
     rm -rf "$OMARCHY_THEMES/erebus-$theme"
     cp -a "$REPO_DIR/themes/erebus-$theme" "$OMARCHY_THEMES/"
 done
 
-echo "[3/5] Installing wallpapers..."
+echo "[4/6] Installing wallpapers..."
 cp -f "$REPO_DIR/wallpapers/"*.jpg "$EREBUS_DIR/wallpapers/"
 
-echo "[4/5] Installing darkness cycle..."
+echo "[5/6] Installing darkness cycle..."
 cp -f "$REPO_DIR/darkness/darkness.sh" "$EREBUS_DIR/darkness.sh"
 chmod +x "$EREBUS_DIR/darkness.sh"
 
 cp -f "$REPO_DIR/darkness/erebus-darkness.service" "$SYSTEMD_DIR/"
 cp -f "$REPO_DIR/darkness/erebus-darkness.timer" "$SYSTEMD_DIR/"
 
-echo "[5/5] Enabling Erebus..."
+echo "[6/6] Enabling Erebus..."
 systemctl --user daemon-reload
 systemctl --user enable --now erebus-darkness.timer
 
