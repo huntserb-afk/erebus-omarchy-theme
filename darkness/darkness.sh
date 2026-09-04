@@ -3,7 +3,7 @@
 STATE_FILE="$HOME/.config/omarchy/erebus/current-state"
 WALLPAPER_DIR="$HOME/.config/omarchy/erebus/wallpapers"
 
-HOUR=$(date +%H)
+HOUR=$(date +%-H)
 
 if (( HOUR >= 6 && HOUR < 9 )); then
     STATE="dawn"
