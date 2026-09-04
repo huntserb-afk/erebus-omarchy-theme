@@ -50,7 +50,7 @@ REPO_DIR="$TMP_DIR/erebus-omarchy-theme-$BRANCH"
     exit 1
 }
 
-for state in dawn day dusk night abyss; do
+for state in dawn day dusk night; do
     [[ -d "$REPO_DIR/themes/erebus-$state" ]] || {
         echo "ERROR: Missing theme: erebus-$state"
         exit 1
@@ -80,7 +80,7 @@ STAGE="$TMP_DIR/stage"
 
 mkdir -p "$STAGE/themes" "$STAGE/wallpapers" "$STAGE/systemd"
 
-for state in dawn day dusk night abyss; do
+for state in dawn day dusk night; do
     cp -a "$REPO_DIR/themes/erebus-$state" "$STAGE/themes/"
 done
 
@@ -99,7 +99,7 @@ echo "[5/7] Installing themes and wallpapers..."
 
 mkdir -p "$OMARCHY_THEMES" "$EREBUS_DIR/wallpapers" "$SYSTEMD_DIR"
 
-for state in dawn day dusk night abyss; do
+for state in dawn day dusk night; do
     rm -rf "$OMARCHY_THEMES/erebus-$state"
     cp -a "$STAGE/themes/erebus-$state" "$OMARCHY_THEMES/"
 done
@@ -130,7 +130,7 @@ echo
 
 echo "[7/7] Verifying installation..."
 
-for state in dawn day dusk night abyss; do
+for state in dawn day dusk night; do
     test -f "$OMARCHY_THEMES/erebus-$state/colors.toml"
     test -f "$OMARCHY_THEMES/erebus-$state/hyprland.conf"
     test -f "$OMARCHY_THEMES/erebus-$state/alacritty.toml"
@@ -151,10 +151,10 @@ echo "Current theme:"
 omarchy theme current
 echo
 echo "Darkness cycle:"
-echo "  00:00 → Abyss"
 echo "  06:00 → Dawn"
 echo "  09:00 → Day"
 echo "  17:00 → Dusk"
 echo "  21:00 → Night"
+echo "  00:00–05:59 → Night"
 echo
 echo "The darkness cycle is now active."
