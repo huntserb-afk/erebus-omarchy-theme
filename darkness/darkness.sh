@@ -11,21 +11,17 @@ elif (( HOUR >= 9 && HOUR < 17 )); then
     STATE="day"
 elif (( HOUR >= 17 && HOUR < 21 )); then
     STATE="dusk"
-elif (( HOUR >= 21 && HOUR < 24 )); then
-    STATE="night"
 else
-    STATE="abyss"
+    STATE="night"
 fi
 
 THEME="erebus-$STATE"
 
-# Abyss currently reuses the Night wallpaper
 case "$STATE" in
     dawn)  WALLPAPER="$WALLPAPER_DIR/EREBUS-DAWN.jpg" ;;
     day)   WALLPAPER="$WALLPAPER_DIR/EREBUS-DAY.jpg" ;;
     dusk)  WALLPAPER="$WALLPAPER_DIR/EREBUS-DUSK.jpg" ;;
     night) WALLPAPER="$WALLPAPER_DIR/EREBUS-NIGHT.jpg" ;;
-    abyss) WALLPAPER="$WALLPAPER_DIR/EREBUS-NIGHT.jpg" ;;
 esac
 
 LAST_STATE=""

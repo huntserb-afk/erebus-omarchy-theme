@@ -14,7 +14,7 @@ systemctl --user disable --now erebus-darkness.timer 2>/dev/null || true
 systemctl --user stop erebus-darkness.service 2>/dev/null || true
 
 echo "[2/4] Removing Erebus themes..."
-for theme in dawn day dusk night abyss; do
+for theme in dawn day dusk night; do
     rm -rf "$OMARCHY_THEMES/erebus-$theme"
 done
 

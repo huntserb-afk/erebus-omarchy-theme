@@ -8,7 +8,6 @@ Erebus changes throughout the day using systemd timers:
 - Day — 09:00
 - Dusk — 17:00
 - Night — 21:00
-- Abyss — 00:00
 
 Each state has its own colors, Hyprland configuration, terminal configuration, and wallpaper.
 
@@ -19,8 +18,7 @@ themes/
 ├── erebus-dawn/
 ├── erebus-day/
 ├── erebus-dusk/
-├── erebus-night/
-└── erebus-abyss/
+└── erebus-night/
 
 wallpapers/
 ├── EREBUS-DAWN.jpg
